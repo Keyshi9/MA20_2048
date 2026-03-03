@@ -102,10 +102,10 @@ def move_down():
 def restart_game():
     global grid, score
     grid = [
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 2]  # Start with one tile
+        [0, 0, 0, 2],
+        [0, 0, 2, 2],
+        [2, 0, 2, 2],
+        [2, 2, 2, 2]
     ]
     score = 0
     update_ui()
