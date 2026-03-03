@@ -27,7 +27,7 @@ def pack4(a, b, c, d):
 
     moves = 0
     
-    # 1. Pushing non-zero values to the left (3 passes to be sure)
+    # 1. Pushing non-zero values to the left
     for i in range(3):
         if a == 0 and b != 0:
             a, b = b, 0
@@ -98,7 +98,19 @@ def move_down():
             changed = True
     return changed
 
-# UI Creation
+# -- Restart Function --
+def restart_game():
+    global grid, score
+    grid = [
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 2]  # Start with one tile
+    ]
+    score = 0
+    update_ui()
+
+# -- UI Creation (Step 2 refactor) --
 
 window = tk.Tk()
 window.title("2048 - Step 4 Draft")
@@ -106,6 +118,11 @@ window.configure(bg="black")
 
 score_label = tk.Label(window, text="Score : 0", fg="white", bg="black", font=("Arial", 14))
 score_label.pack(side="top", anchor="w", padx=30, pady=10)
+
+# Add back the Restart button
+tk.Button(window, text="Restart", bg="#22c55e", fg="white",
+          font=("Arial", 11, "bold"), relief="flat",
+          command=restart_game).place(x=230, y=10)
 
 frame = tk.Frame(window, bg="#3a4555", padx=8, pady=8)
 frame.pack(padx=20, pady=10)
@@ -116,6 +133,7 @@ labels = [
     [None, None, None, None],
     [None, None, None, None]
 ]
+
 
 for i in range(4):
     for j in range(4):
