@@ -1,7 +1,8 @@
-# 2048 - Jeu en Python/Tkinter
-# Auteur : Selle Sow | Date : 10/02/2026
+# 2048 - Game in Python/Tkinter
+# Author : Selle Sow | Date : 10/02/2026
 
 import tkinter as tk
+import random
 
 # Colors (2 to 8192)
 COULEURS = {
@@ -11,12 +12,12 @@ COULEURS = {
     4096: "#061830", 8192: "#041028"
 }
 
-# Test Grid
+# Game Grid
 grid = [
-    [0, 0, 0, 2],
-    [0, 0, 2, 2],
-    [2, 0, 2, 2],
-    [2, 2, 2, 2]
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+    [0, 0, 0, 0]
 ]
 
 score = 0
@@ -59,6 +60,7 @@ def move_left():
     global grid
     changed = False
     for i in range(4):
+        # Pack row values to the left
         a, b, c, d, m = pack4(grid[i][0], grid[i][1], grid[i][2], grid[i][3])
         grid[i][0], grid[i][1], grid[i][2], grid[i][3] = a, b, c, d
         if m > 0:
@@ -98,34 +100,58 @@ def move_down():
             changed = True
     return changed
 
-# -- Restart Function --
+def add_new_tile():
+    global grid
+    # List all empty cells (those containing 0)
+    empty_cells = [(i, j) for i in range(4) for j in range(4) if grid[i][j] == 0]
+    
+    if empty_cells:
+        # Choose a random cell from empty ones
+        i, j = random.choice(empty_cells)
+        
+        # Probability : 80% for a 2, 20% for a 4
+        if random.random() < 0.8:
+            grid[i][j] = 2
+        else:
+            grid[i][j] = 4
+
+
+# Restart Function
 def restart_game():
     global grid, score
     grid = [
-        [0, 0, 0, 2],
-        [0, 0, 2, 2],
-        [2, 0, 2, 2],
-        [2, 2, 2, 2]
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
     ]
     score = 0
+    add_new_tile()
+    add_new_tile()
     update_ui()
 
-# -- UI Creation (Step 2 refactor) --
-
+# UI Creation
 window = tk.Tk()
-window.title("2048 - Step 4 Draft")
-window.configure(bg="black")
+window.title("2048 - Etape 5")
+window.configure(bg="black", padx=20, pady=20) # Black background with page padding
+window.resizable(False, False) # Prevent window resizing
 
-score_label = tk.Label(window, text="Score : 0", fg="white", bg="black", font=("Arial", 14))
-score_label.pack(side="top", anchor="w", padx=30, pady=10)
+# Top Bar for Score and Restart
+header_frame = tk.Frame(window, bg="black")
+header_frame.pack(fill="x", pady=(0, 20))
 
-# Add back the Restart button
-tk.Button(window, text="Restart", bg="#22c55e", fg="white",
-          font=("Arial", 11, "bold"), relief="flat",
-          command=restart_game).place(x=230, y=10)
+score_label = tk.Label(header_frame, text="Score : 0", fg="white", bg="black", font=("Arial", 18, "bold"))
+score_label.pack(side="left")
 
-frame = tk.Frame(window, bg="#3a4555", padx=8, pady=8)
-frame.pack(padx=20, pady=10)
+# Stylized Restart Button
+tk.Button(header_frame, text="Restart", bg="#22c55e", fg="white",
+          font=("Arial", 11, "bold"), relief="flat", padx=15, pady=5,
+          activebackground="#16a34a", cursor="hand2",
+          command=restart_game).pack(side="right")
+
+# Main Game Grid Frame
+frame = tk.Frame(window, bg="#3a4555", padx=10, pady=10) # Grid container with border padding
+frame.pack()
 
 labels = [
     [None, None, None, None],
@@ -134,12 +160,13 @@ labels = [
     [None, None, None, None]
 ]
 
-
+# Create tiles with more spacing
 for i in range(4):
     for j in range(4):
         labels[i][j] = tk.Label(frame, text="", width=4, height=2,
-                                bg=COULEURS[0], font=("Arial", 16, "bold"))
-        labels[i][j].grid(row=i, column=j, padx=4, pady=4)
+                                bg=COULEURS[0], font=("Arial", 22, "bold"),
+                                fg="white")
+        labels[i][j].grid(row=i, column=j, padx=6, pady=6) # Tile spacing
 
 def update_ui():
     score_label.config(text="Score : " + str(score))
@@ -181,11 +208,14 @@ def key_pressed(event):
         moved = move_right()
         
     if moved:
+        add_new_tile()
         update_ui()
 
 # Binding keyboard event
 window.bind('<Key>', key_pressed)
 
-# Initial Display
+# Initial Display with 2 tiles
+add_new_tile()
+add_new_tile()
 update_ui()
 window.mainloop()
