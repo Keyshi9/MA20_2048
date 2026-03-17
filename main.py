@@ -21,6 +21,8 @@ grid = [
 ]
 
 score = 0
+game_over = False
+won_message_shown = False
 
 # Functions for Movement
 
@@ -115,10 +117,38 @@ def add_new_tile():
         else:
             grid[i][j] = 4
 
+def is_game_over():
+    # Check for any empty cell
+    for i in range(4):
+        for j in range(4):
+            if grid[i][j] == 0:
+                return False
+    
+    # Check for horizontal matches
+    for i in range(4):
+        for j in range(3):
+            if grid[i][j] == grid[i][j+1]:
+                return False
+                
+    # Check for vertical matches
+    for j in range(4):
+        for i in range(3):
+            if grid[i][j] == grid[i+1][j]:
+                return False
+                
+    return True
+
+def has_2048():
+    for i in range(4):
+        for j in range(4):
+            if grid[i][j] >= 2048:
+                return True
+    return False
+
 
 # Restart Function
 def restart_game():
-    global grid, score
+    global grid, score, game_over, won_message_shown
     grid = [
         [0, 0, 0, 0],
         [0, 0, 0, 0],
@@ -126,13 +156,16 @@ def restart_game():
         [0, 0, 0, 0]
     ]
     score = 0
+    game_over = False
+    won_message_shown = False
+    status_label.config(text="")
     add_new_tile()
     add_new_tile()
     update_ui()
 
 # UI Creation
 window = tk.Tk()
-window.title("2048 - Etape 5")
+window.title("2048 - Etape 6")
 window.configure(bg="black", padx=20, pady=20) # Black background with page padding
 window.resizable(False, False) # Prevent window resizing
 
@@ -142,6 +175,10 @@ header_frame.pack(fill="x", pady=(0, 20))
 
 score_label = tk.Label(header_frame, text="Score : 0", fg="white", bg="black", font=("Arial", 18, "bold"))
 score_label.pack(side="left")
+
+# Status Label (Win/Loss)
+status_label = tk.Label(window, text="", fg="white", bg="black", font=("Arial", 14, "bold"))
+status_label.pack(pady=(0, 10))
 
 # Stylized Restart Button
 tk.Button(header_frame, text="Restart", bg="#22c55e", fg="white",
@@ -195,9 +232,16 @@ def update_ui():
             )
 
 def key_pressed(event):
+    global game_over, won_message_shown
+    if game_over:
+        return
+        
     key = event.keysym
     moved = False
     
+    # Check if 2048 exists before the move
+    had_2048_before = has_2048()
+
     if key in ["Up", "w", "W"]:
         moved = move_up()
     elif key in ["Down", "s", "S"]:
@@ -210,6 +254,16 @@ def key_pressed(event):
     if moved:
         add_new_tile()
         update_ui()
+        
+        # Check Win Condition
+        if not won_message_shown and not had_2048_before and has_2048():
+            status_label.config(text="Félicitations ! Vous avez atteint 2048 !", fg="#22c55e")
+            won_message_shown = True
+            
+        # Check Loss Condition
+        if is_game_over():
+            game_over = True
+            status_label.config(text="Game Over ! Le tableau est plein.", fg="#ef4444")
 
 # Binding keyboard event
 window.bind('<Key>', key_pressed)
